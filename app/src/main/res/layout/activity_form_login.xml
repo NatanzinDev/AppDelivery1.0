@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -23,7 +27,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Email"
+        android:background="@drawable/edit_text_shape"
         android:padding="15dp"
+        android:maxLines="1"
+        android:inputType="textEmailAddress"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginTop="20dp"
@@ -34,6 +41,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Senha"
+        android:inputType="numberPassword"
+        android:maxLines="1"
+        android:background="@drawable/edit_text_shape"
         android:padding="15dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
@@ -68,11 +78,13 @@
         android:layout_height="wrap_content"
         android:text="Crie uma conta clicando aqui."
         android:layout_gravity="center"
+        android:textStyle="bold"
         android:textSize="18sp"
         />
 
     <ProgressBar
         android:id="@+id/progressBar"
+        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -83,3 +95,4 @@
 
 
 </LinearLayout>
+</androidx.core.widget.NestedScrollView>
