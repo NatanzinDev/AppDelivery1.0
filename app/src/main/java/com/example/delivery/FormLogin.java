@@ -13,6 +13,8 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class FormLogin extends AppCompatActivity {
     private TextView txt_criarConta;
+
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

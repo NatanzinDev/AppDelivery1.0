@@ -1,14 +1,36 @@
 package com.example.delivery;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.Firebase;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class FormCadastro extends AppCompatActivity {
+    private CircleImageView foto;
+    private Button btCadastrar, btSelecionarFoto;
+    private EditText eemail;
+    private EditText enome;
+    private EditText esenha;
+    private TextView msgErro;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,5 +42,82 @@ public class FormCadastro extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        iniciarComponente();
+
+        enome.addTextChangedListener(cadastroTextWatcher);
+        esenha.addTextChangedListener(cadastroTextWatcher);
+        eemail.addTextChangedListener(cadastroTextWatcher);
+
+        btCadastrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cadastrarUsuario(v);
+            }
+        });
+    }
+
+    public void cadastrarUsuario(View v) {
+        String email = eemail.getText().toString();
+        String senha = esenha.getText().toString();
+
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,senha).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                if(task.isSuccessful()){
+
+                    Snackbar snack = Snackbar.make(v,"Cadastro realizado com sucesso!",Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            finish();
+                        }
+                    });
+
+                    snack.show();
+                }
+            }
+        });
+
+    }
+
+    //para visualizar e trocar a cor do botão caso os campos estejam preechidos
+    TextWatcher cadastroTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            String nome = enome.getText().toString();
+            String email = eemail.getText().toString();
+            String senha = esenha.getText().toString();
+
+            if(!nome.isEmpty() && !email.isEmpty() && !senha.isEmpty()){
+                btCadastrar.setEnabled(true);
+                btCadastrar.setBackgroundColor(getResources().getColor(R.color.darkred));
+
+            }else{
+                btCadastrar.setEnabled(false);
+                btCadastrar.setBackgroundColor(getResources().getColor(R.color.gray));
+
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
+    public void iniciarComponente(){
+        foto = findViewById(R.id.fotoUsuario);
+        btCadastrar = findViewById(R.id.bt_cadastrar);
+        btSelecionarFoto = findViewById(R.id.bt_selecionar);
+        esenha = findViewById(R.id.edit_senha);
+        enome = findViewById(R.id.edit_nome);
+        eemail = findViewById(R.id.edit_email);
+        msgErro = findViewById(R.id.txt_msgErro);
+
     }
 }
