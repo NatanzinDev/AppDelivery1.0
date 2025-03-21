@@ -40,7 +40,8 @@ public class Lista_Produtos extends AppCompatActivity {
         int itemId = item.getItemId();
         
         if(itemId == R.id.perfil){
-            
+            Intent intent = new Intent(this,Tela_Perfil.class);
+            startActivity(intent);
         } else if (itemId == R.id.pedidos) {
             
         } else if (itemId == R.id.deslogar) {
