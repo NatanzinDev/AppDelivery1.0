@@ -1,12 +1,19 @@
 package com.example.delivery;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 public class Lista_Produtos extends AppCompatActivity {
 
@@ -20,5 +27,30 @@ public class Lista_Produtos extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_principal,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        
+        if(itemId == R.id.perfil){
+            
+        } else if (itemId == R.id.pedidos) {
+            
+        } else if (itemId == R.id.deslogar) {
+            FirebaseAuth.getInstance().signOut();
+            Toast.makeText(this, "Deslogando usuário", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this,FormLogin.class);
+            startActivity(intent);
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
