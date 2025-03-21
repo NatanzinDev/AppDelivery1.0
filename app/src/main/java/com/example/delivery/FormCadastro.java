@@ -1,14 +1,22 @@
 package com.example.delivery;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -16,6 +24,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Firebase;
@@ -25,16 +35,27 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FormCadastro extends AppCompatActivity {
+    private String IDuser;
     private CircleImageView foto;
     private Button btCadastrar, btSelecionarFoto;
     private EditText eemail;
     private EditText enome;
     private EditText esenha;
     private TextView msgErro;
+    private Uri selecionarUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +79,40 @@ public class FormCadastro extends AppCompatActivity {
                 cadastrarUsuario(v);
             }
         });
+
+        btSelecionarFoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SelecionarFt();
+            }
+        });
+    }
+
+    ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult o) {
+                    if(o.getResultCode() == Activity.RESULT_OK){
+                        Intent data = o.getData();
+                        selecionarUri = data.getData();
+
+                        try {
+                            foto.setImageURI(selecionarUri);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+
+                    }
+                }
+            }
+    );
+    public void SelecionarFt() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        activityResultLauncher.launch(intent);
+
     }
 
     public void cadastrarUsuario(View v) {
@@ -69,7 +124,7 @@ public class FormCadastro extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
 
                 if(task.isSuccessful()){
-
+                    salvarDados();
                     Snackbar snack = Snackbar.make(v,"Cadastro realizado com sucesso!",Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -108,6 +163,58 @@ public class FormCadastro extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void salvarDados() {
+        String nomeArquivo = UUID.randomUUID().toString();
+        final StorageReference reference = FirebaseStorage.getInstance().getReference("/imagens/"+nomeArquivo);
+
+        reference.putFile(selecionarUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+
+                        String ufoto = uri.toString();
+
+                        //Iniciar BD - FireStore
+                        String nome = enome.getText().toString();
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                        Map<String,Object> usuarios = new HashMap<>();
+                        usuarios.put("nome",nome);
+                        usuarios.put("foto",ufoto);
+
+                        //getCurrentUser corresponde ao usuario atual
+                        IDuser = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        DocumentReference documentReference = db.collection("Usuarios").document(IDuser);
+                        documentReference.set(usuarios).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Log.i("db","Sucesso ao salvar os dados");
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i("db_erro","Erro ao salvar os dados"+ e.toString());
+
+                            }
+                        });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
     }
 
     //para visualizar e trocar a cor do botão caso os campos estejam preechidos
