@@ -13,6 +13,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/white"
     tools:context=".Tela_Perfil">
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -28,7 +29,7 @@
         android:id="@+id/txt_nome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Natan Paulo Fernandes"
+        android:text=""
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_gravity="center"
@@ -40,7 +41,7 @@
         android:id="@+id/txt_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="natan123@gmail.com"
+        android:text=""
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_gravity="center"
